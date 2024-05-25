@@ -93,7 +93,7 @@ const App = () => {
         <Box bgcolor="primary.dark" p={2} borderRadius={4} mb={2}>
           <FormControlLabel
             control={<Checkbox checked={fetchFromAPI} onChange={() => setFetchFromAPI(!fetchFromAPI)} />}
-            label="For Real-time data, check this box (Fetch data from API every minute and update)"
+            label="For Real-time data, check this box and provide api link (Fetch data from API every minute and update)"
           />
           {fetchFromAPI && (
             <>

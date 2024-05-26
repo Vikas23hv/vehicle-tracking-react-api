@@ -46,16 +46,14 @@ const App = () => {
   const [apiLink, setApiLink] = useState('');
   const [pendingLink, setPendingLink] = useState('');
 
-  useEffect(() => {
-    if (gpsData.length) {
-      const identifiedStoppages = identifyStoppages(gpsData, threshold);
-      setStoppages(identifiedStoppages);
-    }
-  }, [gpsData, threshold]);
-
+  // Clear data when switching data sources and clear interval if needed
   useEffect(() => {
     let interval;
-    if (fetchFromAPI) {
+    if (!fetchFromAPI) {
+      setApiLink('');
+      setGpsData([]);
+      setStoppages([]);
+    } else if (fetchFromAPI && apiLink) {
       const fetchData = async () => {
         try {
           const response = await fetch(apiLink);
@@ -65,13 +63,33 @@ const App = () => {
           console.error('Error fetching data:', error);
         }
       };
-
       fetchData(); // Fetch data immediately on start
       interval = setInterval(fetchData, 60000); // Fetch data every 60 seconds
-
-      return () => clearInterval(interval); // Cleanup interval on unmount
     }
+
+    return () => clearInterval(interval); // Cleanup interval on unmount or mode switch
   }, [fetchFromAPI, apiLink]);
+
+  // Clear data when API link changes
+  useEffect(() => {
+    setGpsData([]);
+    setStoppages([]);
+  }, [apiLink]);
+
+  useEffect(() => {
+    if (!fetchFromAPI) {
+      setApiLink('');
+    }
+    setGpsData([]);
+    setStoppages([]);
+  }, [fetchFromAPI]);
+
+  useEffect(() => {
+    if (gpsData.length) {
+      const identifiedStoppages = identifyStoppages(gpsData, threshold);
+      setStoppages(identifiedStoppages);
+    }
+  }, [gpsData, threshold]);
 
   const handleFileUpload = async (file) => {
     const data = await readExcelFile(file);
@@ -80,7 +98,6 @@ const App = () => {
 
   const handleApiLinkUpdate = () => {
     setApiLink(pendingLink);
-    setPendingLink('');
   };
 
   return (
@@ -108,11 +125,12 @@ const App = () => {
             </>
           )}
         </Box>
-        <Typography variant="h5" gutterBottom>
-          For already available data, upload files here (format: .xls, .xlsx)
-        </Typography>
+
         {!fetchFromAPI && (
           <Box>
+          <Typography variant="h5" gutterBottom>
+          For already available data, upload files here (format: .xls, .xlsx)
+        </Typography>
             <UploadButton variant="contained" component="label">
               Upload File
               <input type="file" hidden onChange={(e) => handleFileUpload(e.target.files[0])} />
@@ -129,5 +147,7 @@ const App = () => {
 };
 
 export default App;
+
+
 
 

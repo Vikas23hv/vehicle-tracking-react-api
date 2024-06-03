@@ -5,7 +5,7 @@ export const identifyStoppages = (gpsData, threshold) => {
   let start = null;
 
   for (let i = 1; i < gpsData.length; i++) {
-    const isStationary = gpsData[i].speed < 10;
+    const isStationary = gpsData[i].speed < 1;
 
     if (isStationary) {
       if (!start) start = i - 1;
